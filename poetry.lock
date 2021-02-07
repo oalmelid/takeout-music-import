@@ -1,0 +1,17 @@
+[[package]]
+name = "sanction"
+version = "0.4.1"
+description = "A simple, lightweight OAuth2 client"
+category = "main"
+optional = false
+python-versions = "*"
+
+[metadata]
+lock-version = "1.1"
+python-versions = "^3.8"
+content-hash = "92eb9bd4121563bcaa748e4a0ed5af91b51e03615b7ab96e6031d62095353f03"
+
+[metadata.files]
+sanction = [
+    {file = "sanction-0.4.1.tar.gz", hash = "sha256:3e41b24e28590a0dfed68eddd10e44fa01feb81812ffb49085ca764e51aea9fe"},
+]
