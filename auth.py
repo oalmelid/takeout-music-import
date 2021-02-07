@@ -1,5 +1,5 @@
 import uuid
-from flask import Flask, redirect, request
+from flask import Flask, redirect, request, render_template
 from urllib import parse
 
 HOST = "localhost"
@@ -39,19 +39,21 @@ def auth_deezer():
 
 
 @app.route("/token", methods=["GET"])
-def receive_token():
+def auth_sucess():
     if request.args.get("error_reason") == "user_denied":
         return "Error: user declined auth"
 
-    token = request.args.get("access_token")
-    print(f"Got token: {token}")
-    print(request.url)
-    print(request.args)
+    return render_template("token.html")
 
-    # Now to write some javascript to handle the token.
-    return "OK"
+
+@app.route("/submit", methods=["GET"])
+def receive_token():
+    global token
+    token = request.args.get("access_token")
+    return "Autentication complete"
 
 
 if __name__ == "__main__":
+    token = None
     app.config.update(DEBUG=True)
     app.run(host=HOST, port=PORT)
