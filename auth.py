@@ -12,10 +12,9 @@ CLIENT_ID = 461222
 app = Flask(__name__)
 
 
-def auth_uri(state, scope="manage_library", response_type="token", **kwargs):
+def auth_uri(scope="manage_library", response_type="token", **kwargs):
     kwargs.update(
         {
-            "state": state,
             "client_id": CLIENT_ID,
             "scope": scope,
             "response_type": response_type,
@@ -32,9 +31,7 @@ def handle_root():
 
 @app.route("/deezer", methods=["GET"])
 def auth_deezer():
-    # this is assumed to be single-client, single-flow, no interruptions.
-    state = uuid.uuid4().hex
-    uri = auth_uri(state)
+    uri = auth_uri()
     return redirect(uri)
 
 
