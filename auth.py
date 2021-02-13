@@ -1,10 +1,15 @@
+import time
 import uuid
+import webbrowser
+from threading import Thread
+
 from flask import Flask, redirect, request, render_template
 from urllib import parse
 
 HOST = "localhost"
 PORT = "8080"
-REDIRECT_URI = f"http://{HOST}:{PORT}/token"
+HOME_URI = f"http://{HOST}:{PORT}/"
+REDIRECT_URI = f"{HOME_URI}token"
 
 AUTH_ENDPOINT = "https://connect.deezer.com/oauth/auth.php"
 CLIENT_ID = 461222
@@ -25,12 +30,7 @@ def auth_uri(scope="manage_library", response_type="token", **kwargs):
 
 
 @app.route("/", methods=["GET"])
-def handle_root():
-    return "This is a placeholder response"
-
-
-@app.route("/deezer", methods=["GET"])
-def auth_deezer():
+def forward_to_deezer():
     uri = auth_uri()
     return redirect(uri)
 
@@ -45,12 +45,28 @@ def auth_sucess():
 
 @app.route("/submit", methods=["GET"])
 def receive_token():
-    global token
-    token = request.args.get("access_token")
-    return "Autentication complete"
+    global TOKEN
+    TOKEN = request.args.get("access_token")
+
+    shutdown_func = request.environ.get("werkzeug.server.shutdown")
+
+    if shutdown_func is None:
+        raise RuntimeError("Not running with the Werkzeug Server")
+
+    # Surprisingly this works, I guess werkzeug attempts a graceful shutdown.
+    shutdown_func()
+    return "Autentication complete, you may now close this tab."
 
 
-if __name__ == "__main__":
-    token = None
-    app.config.update(DEBUG=True)
-    app.run(host=HOST, port=PORT)
+def get_token():
+    # Authentication token. The flask server is only spun up transiently to
+    # obtain a token.
+    TOKEN = None
+    server_process = Thread(target=app.run, kwargs={"host": HOST, "port": PORT})
+    server_process.start()
+    webbrowser.open_new_tab(HOME_URI)
+
+    while TOKEN is None:
+        time.sleep(0.1)
+
+    return TOKEN
